@@ -1,0 +1,89 @@
+<html>
+
+<head>
+  <title><%= title %> - Berat</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <div class="navbar">
+      <h3><%= title %></h3>
+  </div>
+  <div class="wrapper">
+      <div class="box box-1">
+          <ul class="sidemenu">
+            <li class="sidemenu-header">
+                Menu
+            </li>
+            <li class="sidemenu-item active">
+                Beranda
+            </li>
+            <li class="sidemenu-item">
+                <a href="/tambah">Tambah</a>
+            </li>
+          </ul>
+      </div>
+      <div class="box box-2">
+          <table border="1">
+              <thead>
+                  <tr>
+                    <td>Tanggal</td>
+                    <td>Max</td>
+                    <td>Min</td>
+                    <td>Perbedaan</td>
+                    <td>Detail</td>
+                  </tr>
+              </thead>
+              <tbody id="t-body">
+            
+              </tbody>
+          </table>
+          <span id="empty"></span>
+      </div>
+  </div>
+</body>
+
+</html>
+
+<script>
+    /* Populate table */
+    $.ajax({
+        method: 'GET',
+        url: '/api/get-all',
+        dataType: 'json'
+    }).done(function(result){
+        if(result.data != null){
+            var sumMax = 0;
+            var sumMin = 0;
+            var sumDif = 0;
+            var countResult = result.data.length;
+            result.data.forEach(function(element) {
+                var html = "<tr>" + 
+                           "<td>" + element.tanggal.split('T')[0] + "</td>" +
+                           "<td>" + element.max + "</td>" +
+                           "<td>" + element.min + "</td>" +
+                           "<td>" + (element.max - element.min) + "</td>" +
+                           "<td><a href='/show-detail/"+ element.tanggal.split('T')[0] +
+                                "'>Lihat Detail</a></td>" +
+                           "</tr>";
+                $('#t-body').append(html);
+                sumMax += element.max;
+                sumMin += element.min;
+                sumDif += (element.max - element.min);
+            }, this);
+            var html = "<tr class='last-tr'>" +
+                       "<td>Rata-rata</td>" +
+                       "<td>" + (sumMax.toFixed(2)/countResult).toFixed(2) + "</td>" +
+                       "<td>" + (sumMin.toFixed(2)/countResult).toFixed(2) + "</td>" +
+                       "<td>" + (sumDif.toFixed(2)/countResult).toFixed(2) + "</td>" +
+                       "<td></td>" +
+                       "</tr>";
+            $('#t-body').append(html);
+        }else{
+            $('#empty').html(result.message)
+        }
+    }).fail(function(jqXHR, textStatus, errorThrown){
+        alert(textStatus, errorThrown);
+    })
+</script>
